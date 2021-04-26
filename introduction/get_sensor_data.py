@@ -12,19 +12,21 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'software_installation'))
 
-from spark_agent import SparkAgent
+from spark_agent import SparkAgent, Perception
 
 
 class MyAgent(SparkAgent):
-    def think(self, perception):
+    def think(self, perception: Perception):
         angle = 0
         temperature = 0
         # YOUR CODE HERE
         # get angle and temperature to current data of joint HeadYaw
+        angle = perception.joint['HeadYaw']
+        temperature = perception.joint_temperature['HeadYaw']
 
-        print 'HeadYaw angle: ' + str(angle) + ' temperature: ' + str(temperature)
-        return super(MyAgent, self).think(perception)
+        print('HeadYaw angle: ' + str(angle) + ' temperature: ' + str(temperature))
+        return super().think(perception)
 
 if '__main__' == __name__:
-    agent = MyAgent()
+    agent = MyAgent(simspark_port=6680)
     agent.run()

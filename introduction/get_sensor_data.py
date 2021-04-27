@@ -28,5 +28,5 @@ class MyAgent(SparkAgent):
         return super().think(perception)
 
 if '__main__' == __name__:
-    agent = MyAgent(simspark_port=6680)
+    agent = MyAgent()
     agent.run()

@@ -21,7 +21,7 @@
 
 
 from pid import PIDAgent
-from keyframes import hello
+from keyframes import hello, wipe_forehead
 
 
 class AngleInterpolationAgent(PIDAgent):
@@ -41,10 +41,37 @@ class AngleInterpolationAgent(PIDAgent):
     def angle_interpolation(self, keyframes, perception):
         target_joints = {}
         # YOUR CODE HERE
+        for i, joint_name in enumerate(keyframes[0]):
+            times = keyframes[1][i]
+            keys = keyframes[2][i]
+
+            if len(times) < 1 or joint_name not in perception.joint.keys():
+                continue
+
+            angle = keys[0][0]
+            if joint_name in perception.joint.keys() and abs(angle - perception.joint[joint_name]) < 0.00001:
+                times.pop(0)
+                angle = keys.pop(0)[0]
+
+            time = times[0]
+            p0_angle = perception.joint[joint_name]
+            p1_angle = keys[0][1][-1]
+            p2_angle = angle
+            p3_angle = keys[0][-1][-1]
+
+            t = perception.time / (perception.time + time)
+
+            bezier_interpolation = \
+                (1 - 3)**3 * p0_angle \
+                    + 3*(1 - t)**2 * t * p1_angle \
+                        + 3*(1 - t) * t**2 * p2_angle \
+                            + t**3 * p3_angle
+            target_joints[joint_name] = bezier_interpolation
 
         return target_joints
 
+
 if __name__ == '__main__':
     agent = AngleInterpolationAgent()
-    agent.keyframes = hello()  # CHANGE DIFFERENT KEYFRAMES
+    agent.keyframes = wipe_forehead(None)  # CHANGE DIFFERENT KEYFRAMES
     agent.run()

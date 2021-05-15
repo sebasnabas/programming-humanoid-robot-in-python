@@ -55,13 +55,14 @@ class PIDController(object):
         # YOUR CODE HERE
         error = target - sensor
 
-        self.u = self.u + (self.Kp + self.Ki*self.dt + self.Kd/self.dt)*error -\
+        u = self.y.pop() + (self.Kp + self.Ki*self.dt + self.Kd/self.dt)*error -\
             (self.Kp + (2*self.Kd)/self.dt)*self.e1 + (self.Kd/self.dt)*self.e2
 
         self.e2 = self.e1
         self.e1 = error
 
-        self.y.append(self.u)
+        self.y.appendleft(u)
+        self.u = u
 
         return self.u
 

@@ -64,7 +64,7 @@ class AngleInterpolationAgent(PIDAgent):
                 continue
 
             tck = scipy.interpolate.splrep(x=x, y=y, k=k)
-            r = scipy.interpolate.splev([rel_time + 0.1], tck)
+            r = scipy.interpolate.splev([rel_time + 0.025], tck)
 
             target_joints[joint_name] = r[0]
 

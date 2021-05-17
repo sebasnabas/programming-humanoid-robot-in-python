@@ -34,7 +34,7 @@ class PIDController(object):
         self.e1 = np.zeros(size)
         self.e2 = np.zeros(size)
         # ADJUST PARAMETERS BELOW
-        delay = 0
+        delay = 1
         self.Kp = 27
         self.Ki = 0
         self.Kd = 0.1

@@ -131,6 +131,8 @@ class ForwardKinematicsAgent(AngleInterpolationAgent):
         for chain_joints in self.chains.values():
             T = identity(4)
             for joint in chain_joints:
+                if joint not in joints:
+                    continue
                 angle = joints[joint]
                 Tl = self.local_trans(joint, angle)
                 # YOUR CODE HERE

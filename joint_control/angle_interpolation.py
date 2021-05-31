@@ -48,6 +48,10 @@ class AngleInterpolationAgent(PIDAgent):
         if not self._start_time:
             self._start_time = perception.time
 
+        rel_time = perception.time - self._start_time
+
+        is_done = keyframes != ([], [], [])
+
         for i, joint_name in enumerate(keyframes[0]):
             times = keyframes[1][i]
             keys = keyframes[2][i]
@@ -58,15 +62,19 @@ class AngleInterpolationAgent(PIDAgent):
 
             k = len(x) - 1 if len(x) <= 3 else 3
 
-            rel_time = perception.time - self._start_time
-
             if rel_time > times[-1]:
                 continue
+
+            is_done = False
 
             tck = scipy.interpolate.splrep(x=x, y=y, k=k)
             r = scipy.interpolate.splev([rel_time + 0.025], tck)
 
             target_joints[joint_name] = r[0]
+
+        if is_done:
+            self._start_time = None
+            self.keyframes = ([], [], [])
 
         return target_joints
 

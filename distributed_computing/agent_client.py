@@ -5,12 +5,15 @@
 * The PostHandler can be implement in the last step, it provides non-blocking functions, e.g. agent.post.execute_keyframes
  * Hints: [threading](https://docs.python.org/2/library/threading.html) may be needed for monitoring if the task is done
 '''
+import os
+import sys
 from threading import Thread
 import weakref
 
 from xmlrpc.client import ServerProxy
 
-from joint_control.keyframes import hello
+sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'joint_control'))
+from keyframes import hello
 
 class PostHandler(object):
     '''the post hander wraps function to be excuted in paralle
@@ -18,19 +21,19 @@ class PostHandler(object):
     def __init__(self, obj):
         self.proxy = weakref.proxy(obj)
 
-    def execute_keyframes(self, keyframes):
+    def execute_keyframes(self, key_frames):
         '''non-blocking call of ClientAgent.execute_keyframes'''
         # YOUR CODE HERE
-        thread = Thread(self.proxy.execute_transforms,
-                             args=(keyframes))
+        thread = Thread(target=self.proxy.execute_keyframes,
+                        args=[key_frames])
         thread.start()
         return thread
 
     def set_transform(self, effector_name, transform):
         '''non-blocking call of ClientAgent.set_transform'''
         # YOUR CODE HERE
-        thread = Thread(self.proxy.set_transform,
-                             args=(effector_name, transform))
+        thread = Thread(target=self.proxy.set_transform,
+                        args=[effector_name, transform])
         thread.start()
         return thread
 
@@ -40,24 +43,24 @@ class ClientAgent(object):
     '''
     # YOUR CODE HERE
     def __init__(self, server_uri='http://localhost:8888'):
-        self._server = ServerProxy(server_uri)
-        self.post = PostHandler(self._server)
+        self._server_proxy = ServerProxy(server_uri, allow_none=True)
+        self.post = PostHandler(self._server_proxy)
 
     def get_angle(self, joint_name):
         '''get sensor value of given joint'''
         # YOUR CODE HERE
-        return self._server.get_angle(joint_name)
+        return self._server_proxy.get_angle(joint_name)
 
     def set_angle(self, joint_name, angle):
         '''set target angle of joint for PID controller
         '''
         # YOUR CODE HERE
-        return self._server.set_angle(joint_name, angle)
+        return self._server_proxy.set_angle(joint_name, angle)
 
     def get_posture(self):
         '''return current posture of robot'''
         # YOUR CODE HERE
-        return self._server.get_posture()
+        return self._server_proxy.get_posture()
 
     def execute_keyframes(self, keyframes):
         '''excute keyframes, note this function is blocking call,
@@ -70,7 +73,7 @@ class ClientAgent(object):
         '''get transform with given name
         '''
         # YOUR CODE HERE
-        return self._server.get_transform(name)
+        return self._server_proxy.get_transform(name)
 
     def set_transform(self, effector_name, transform):
         '''solve the inverse kinematics and control joints use the results
@@ -84,3 +87,4 @@ if __name__ == '__main__':
     print(agent.get_angle('HeadYaw'))
 
     agent.execute_keyframes(hello())
+    print('Done')

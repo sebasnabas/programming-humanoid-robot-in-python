@@ -14,6 +14,7 @@
 # add PYTHONPATH
 import os
 import sys
+from time import sleep
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'kinematics'))
 
 from threading import Thread
@@ -27,8 +28,8 @@ class ServerAgent(InverseKinematicsAgent):
     '''
     # YOUR CODE HERE
     def __init__(self, ip_address='localhost', port=8888):
-        super(ServerAgent).__init__()
-        self.__server = SimpleXMLRPCServer(addr=(ip_address, port))
+        super().__init__()
+        self.__server = SimpleXMLRPCServer(addr=(ip_address, port), allow_none=True)
 
         self.__server.register_introspection_functions()
         self.__server.register_function(self.get_angle)
@@ -43,25 +44,27 @@ class ServerAgent(InverseKinematicsAgent):
     def get_angle(self, joint_name):
         '''get sensor value of given joint'''
         # YOUR CODE HERE
-        return self.perception[joint_name]
+        return self.perception.joint[joint_name]
 
     def set_angle(self, joint_name, angle):
         '''set target angle of joint for PID controller
         '''
         # YOUR CODE HERE
-        self.target_jointsp[joint_name] = angle
+        self.target_joints[joint_name] = angle
 
     def get_posture(self):
         '''return current posture of robot'''
         # YOUR CODE HERE
         return self.posture
 
-    def execute_keyframes(self, keyframes):
+    def execute_keyframes(self, key_frames):
         '''excute keyframes, note this function is blocking call,
         e.g. return until keyframes are executed
         '''
         # YOUR CODE HERE
-        self.keyframes = keyframes
+        self.keyframes = key_frames
+        while self.keyframes[0]:
+            sleep(0.2)
 
     def get_transform(self, name):
         '''get transform with given name
